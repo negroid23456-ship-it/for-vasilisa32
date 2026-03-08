@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Для Василисы ❤️</title>
+    <style>
+        * { touch-action: manipulation; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; background: #000; color: #fff; 
+            font-family: 'Segoe UI', sans-serif; 
+            overflow: hidden; width: 100vw; height: 100vh;
+        }
+        
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; display: flex; justify-content: center; align-items: center;
+            z-index: 9999; transition: opacity 1.2s ease;
+        }
+        #btn {
+            padding: 20px 35px; font-size: 22px; background: #ff4d6d;
+            color: white; border: none; border-radius: 50px; 
+            box-shadow: 0 0 30px rgba(255, 77, 109, 0.5); cursor: pointer;
+        }
+
+        #main-content { 
+            display: none; opacity: 0; padding: env(safe-area-inset-top) 10px; 
+            position: relative; z-index: 10; 
+            transition: opacity 1.5s ease-in; 
+            height: 100vh; width: 100%;
+        }
+        .fade-in { opacity: 1 !important; }
+
+        canvas { position: fixed; top: 0; left: 0; z-index: 1; pointer-events: none; }
+
+        /* Слайдер */
+        .slider-wrapper {
+            position: relative; width: 100%; max-width: 400px; margin: 10px auto;
+            overflow: hidden; border-radius: 25px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 77, 109, 0.3);
+            backdrop-filter: blur(10px);
+        }
+        .slides-container {
+            display: flex; transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+            width: 600%; 
+        }
+        .slide { width: 16.666%; padding: 10px; flex-shrink: 0; }
+        .slide img, .slide video { 
+            width: 100%; border-radius: 15px; 
+            height: 55vh; object-fit: cover; 
+            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+            background: #111;
+        }
+        .caption { 
+            margin: 15px 5px; color: #ffb3c1; 
+            font-style: italic; font-size: 1.1rem; 
+            min-height: 3em; display: flex; align-items: center; justify-content: center;
+            text-align: center;
+        }
+        
+        .nav-bar { display: flex; justify-content: center; align-items: center; margin-bottom: 10px; }
+        .btn-nav { 
+            background: #ff4d6d; border: none; color: white; 
+            width: 55px; height: 55px; border-radius: 50%; 
+            cursor: pointer; margin: 0 15px; font-size: 24px;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* ЭКРАН С ИЗВИНЕНИЕМ */
+        #sorry-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; justify-content: center; align-items: center;
+            z-index: 50; background: #000; opacity: 0;
+            transition: opacity 2s ease;
+        }
+        .sorry-text {
+            font-size: 3rem; font-weight: bold; color: #ff4d6d;
+            text-transform: uppercase; text-align: center;
+            padding: 20px; text-shadow: 0 0 20px #ff4d6d;
+        }
+
+        /* ФИНАЛЬНЫЙ ЭКРАН */
+        #final-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            display: none; flex-direction: column; justify-content: center;
+            align-items: center; z-index: 100; background: #000;
+        }
+        #flower-eight { position: relative; width: 80vw; height: 50vh; max-width: 300px; }
+        .flower { position: absolute; opacity: 0; transform: scale(0); animation: grow 1.5s forwards; font-size: 28px; }
+        @keyframes grow { to { opacity: 1; transform: scale(1) rotate(360deg); } }
+
+        .thanks-text { 
+            font-size: 2rem; color: #fff; margin-top: 30px; 
+            text-shadow: 0 0 15px #ff4d6d; opacity: 0; text-align: center;
+        }
+        .show-text { animation: fadeInText 2s forwards 1s; }
+        @keyframes fadeInText { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="overlay" onclick="start()">
+        <button id="btn">Нажми сюда, Василиса ❤️</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <div id="main-content">
+        <h1 style="color:#ff4d6d; font-size: 1.8rem; margin: 10px 0; text-shadow: 0 0 10px #ff4d6d;">С 8 Марта!</h1>
+        <div class="slider-wrapper">
+            <div class="slides-container" id="track">
+                <div class="slide"><img src="photo1.jpg"><div class="caption">Тут мы с тобой готовим синабоны</div></div>
+                <div class="slide"><img src="photo2.jpg"><div class="caption">Тут ты просто шикарна</div></div>
+                <div class="slide"><img src="photo3.jpg"><div class="caption">Тут твоя улыбка греет лучше солнца</div></div>
+                <div class="slide">
+                    <video id="myVideo" playsinline muted loop><source src="video.mp4" type="video/mp4"></video>
+                    <div class="caption">А здесь наше особенное видео ❤️</div>
+                </div>
+                <div class="slide"><img src="photo5.jpg"><div class="caption">Хочу чтоб ты была рядом)</div></div>
+                <div class="slide"><img src="photo6.jpg"><div class="caption">Запомни для меня лучше всех это ТЫ!!</div></div>
+            </div>
+        </div>
+        <div class="nav-bar">
+            <button class="btn-nav" onclick="prev()">←</button>
+            <button class="btn-nav" onclick="next()">→</button>
+        </div>
+    </div>
+
+    <div id="sorry-screen">
+        <div class="sorry-text">ИЗВИНИ МЕНЯ ЗА ВСЕ</div>
+    </div>
+
+    <div id="final-screen">
+        <div id="flower-eight"></div>
+        <div id="thanks" class="thanks-text">Спасибо тебе за всё</div>
+    </div>
+
+    <audio id="music" loop preload="auto"><source src="music.mp3" type="audio/mpeg"></audio>
+
+    <script>
+        let current = 0;
+        const totalSlides = 6;
+        const track = document.getElementById('track');
+        const video = document.getElementById('myVideo');
+        
+        function start() {
+            const overlay = document.getElementById('overlay');
+            const main = document.getElementById('main-content');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                main.style.display = 'block';
+                setTimeout(() => main.classList.add('fade-in'), 50);
+            }, 1000);
+            document.getElementById('music').play().catch(() => {});
+            initCanvas();
+        }
+
+        function updateSlider() {
+            track.style.transform = `translateX(-${current * (100 / totalSlides)}%)`;
+            if (current === 3) { video.play(); } else { video.pause(); }
+        }
+
+        function next() {
+            if (current === totalSlides - 1) { showSorryScreen(); return; }
+            current++; updateSlider();
+        }
+
+        function prev() {
+            if (current > 0) { current--; updateSlider(); }
+        }
+
+        function showSorryScreen() {
+            // Исчезает альбом
+            document.getElementById('main-content').style.opacity = '0';
+            video.pause();
+            
+            setTimeout(() => {
+                document.getElementById('main-content').style.display = 'none';
+                const sorry = document.getElementById('sorry-screen');
+                sorry.style.display = 'flex';
+                // Плавное появление надписи
+                setTimeout(() => sorry.style.opacity = '1', 50);
+                
+                // Через 3.5 секунды переходим к восьмерке
+                setTimeout(() => {
+                    sorry.style.opacity = '0';
+                    setTimeout(() => {
+                        sorry.style.display = 'none';
+                        showFinal();
+                    }, 2000);
+                }, 3500);
+            }, 1500);
+        }
+
+        function showFinal() {
+            const final = document.getElementById('final-screen');
+            final.style.display = 'flex';
+            createFlowerEight();
+            document.getElementById('thanks').classList.add('show-text');
+        }
+
+        function createFlowerEight() {
+            const container = document.getElementById('flower-eight');
+            const flowers = ['🌸', '🌹', '🌺', '🌷', '🏵️'];
+            const points = 55; 
+            const rect = container.getBoundingClientRect();
+            const centerX = rect.width / 2;
+            const centerY = rect.height / 2;
+            const radius = rect.width * 0.35;
+
+            for (let i = 0; i < points; i++) {
+                const t = (i / points) * Math.PI * 2;
+                let x, y;
+                if (i < points / 2) {
+                    x = centerX + radius * Math.cos(t * 2);
+                    y = centerY + radius * Math.sin(t * 2) - radius;
+                } else {
+                    x = centerX + (radius * 1.1) * Math.cos(t * 2);
+                    y = centerY + (radius * 1.1) * Math.sin(t * 2) + radius;
+                }
+                const flower = document.createElement('div');
+                flower.className = 'flower';
+                flower.innerText = flowers[Math.floor(Math.random() * flowers.length)];
+                flower.style.left = `${x}px`;
+                flower.style.top = `${y}px`;
+                flower.style.animationDelay = `${i * 0.05}s`;
+                container.appendChild(flower);
+            }
+        }
+
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let drops = [];
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            drops = Array(Math.floor(canvas.width/25)).fill(1);
+            setInterval(() => {
+                ctx.fillStyle = 'rgba(0,0,0,0.15)';
+                ctx.fillRect(0,0,canvas.width,canvas.height);
+                ctx.fillStyle = '#ff4d6d';
+                ctx.font = "14px Arial";
+                drops.forEach((y, i) => {
+                    ctx.fillText('❤', i*25, y*20);
+                    if(y*20 > canvas.height && Math.random() > 0.98) drops[i] = 0;
+                    drops[i]++;
+                });
+            }, 60);
+        }
+        window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; });
+    </script>
+</body>
+</html>
+
